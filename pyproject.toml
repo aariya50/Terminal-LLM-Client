@@ -12,7 +12,7 @@ termcolor = "^2.4.0"
 halo = "^0.0.31"
 
 [tool.poetry.scripts]
-llm = "src.llm_cli:main"
+llm = "llm_cli.llm_cli:main"
 
 [build-system]
 requires = ["poetry-core"]

@@ -6,11 +6,11 @@ import argparse
 from subprocess import Popen, PIPE, STDOUT
 from termcolor import colored
 from halo import Halo
-from llm_cli_helper.shell import Shell
-from llm_cli_helper.chat import Chat, Role, Message
-from llm_cli_helper.chat_helper.gpt import GPT
-from llm_cli_helper.prompt import Prompt
-from llm_cli_helper.prompt_helper.response import PromptResponse, Command, Thoughts
+from llm_cli.llm_cli_helper.shell import Shell
+from llm_cli.llm_cli_helper.chat import Chat, Role, Message
+from llm_cli.llm_cli_helper.chat_helper.gpt import GPT
+from llm_cli.llm_cli_helper.prompt import Prompt
+from llm_cli.llm_cli_helper.prompt_helper.response import PromptResponse, Command, Thoughts
 
 def handle_cd_command(command_parts):
     """Handles the 'cd' part of the command and changes the directory."""

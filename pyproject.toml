@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "llm-cli-python"
+name = "llm-cli"
 version = "0.1.0"
 description = "A command-line interface for LLM"
 authors = ["Ariya Amarjargal <amarj003@umn.edu>"]
@@ -12,7 +12,7 @@ termcolor = "^2.4.0"
 halo = "^0.0.31"
 
 [tool.poetry.scripts]
-llm = "llm_cli_python.src.llm_cli:main"
+llm = "src.llm_cli:main"
 
 [build-system]
 requires = ["poetry-core"]

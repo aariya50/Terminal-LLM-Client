@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "llm-cli-python"
+version = "0.1.0"
+description = "A command-line interface for LLM"
+authors = ["Ariya Amarjargal <amarj003@umn.edu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.32.3"
+termcolor = "^2.4.0"
+halo = "^0.0.31"
+
+[tool.poetry.scripts]
+llm = "llm_cli_python.src.llm_cli:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

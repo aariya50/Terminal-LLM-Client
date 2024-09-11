@@ -156,12 +156,11 @@ LLM-CLI will check if the API key is set before sending any queries.
 
 ### Model Selection
 
-If you do not specify a model with the `--model` option, LLM-CLI will automatically default to model (`"gpt-3.5-turbo"`). The CLI will check the following models in order of preference:
+If you do not specify a model with the `--model` option, LLM-CLI will automatically default to model (`"gpt-4o-mini"`). The CLI will check the following models in order of preference:
 
 1. The model provided via the `--model` option.
 2. Preferred models:
-   - `"gpt-4"`
-   - `"gpt-3.5-turbo"`
+   - `"gpt-4o-mini"`
 
 ## Development
 

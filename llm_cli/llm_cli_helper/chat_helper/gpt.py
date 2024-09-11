@@ -36,7 +36,7 @@ class GPT(Chat):
         session, headers = self.client()
         response = session.get("https://api.openai.com/v1/models", headers=headers)
         models = [model["id"] for model in response.json()["data"]]
-        preferred = [self.model_preference, "gpt-4", "gpt-3.5-turbo"]
+        preferred = [self.model_preference, "gpt-4o-mini"]
         
         for model in preferred:
             if model and model in models:

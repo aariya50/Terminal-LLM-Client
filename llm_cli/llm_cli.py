@@ -170,9 +170,9 @@ def main():
         print(colored(f"> Requesting:\n{prompt_message}\n", "red"))
 
     try:
-        spin.start()  # Start spinner if implemented
+        spin.start()
         response = chat.send(prompt_message)
-        spin.stop()  # Stop spinner if implemented
+        spin.stop()
 
         if verbose:
             print(colored(f"> Raw response:\n{response}\n", "red"))
@@ -228,15 +228,19 @@ def main():
                         execute = execute.replace(sub, replacement)
 
                     print(colored(execute, "dark_grey"))
-                    do_exec = shell.get_input("execute [Y]? ").strip()
-
+                    do_exec = shell.get_input(colored("Execute [Y]? ", "green")).strip()
                     # Check for 'exit' command before executing
                     if do_exec.lower() == "exit":
-                        print("Exiting process.")
+                        print(colored("Exiting process.", "red"))
+                        sys.exit(0)
+                    
+                    # Stop execution if the user doesn't confirm with 'y'
+                    if not do_exec.lower().startswith("y"):
+                        print(colored("Failed to approve command execution.", "red"))
                         sys.exit(0)
 
-                    if not do_exec or do_exec.lower().startswith("y"):
-                        execute_commands(shell, execute)
+                    # If the user confirms, proceed with execution
+                    execute_commands(shell, execute)
             except KeyboardInterrupt:
                 print("\nProcess interrupted. Exiting gracefully.")
                 sys.exit(0)

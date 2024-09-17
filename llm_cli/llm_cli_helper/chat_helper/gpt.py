@@ -1,56 +1,69 @@
 import os
-import requests
-import json
 from ..chat import Chat
-from .openai.chat_completion import CreateChatCompletion, ChatCompletion
+from openai import OpenAI, OpenAIError
+
 
 class GPT(Chat):
+    def __init__(self, model_preference="gpt-4o-mini"):
+        """
+        Initialize with a preferred model, defaulting to 'gpt-4o-mini'.
+        Client initialization is deferred to reduce unnecessary API connections.
+        """
+        self._client = None
+        self.model_preference = model_preference
+
     @classmethod
     def requirements(cls):
+        """
+        Provides requirements for using the GPT class.
+        """
         return {
-            "name": "OpenAI GPT",
+            "name": "gpt",
             "requires": ["OPENAI_API_KEY"],
-            "optional": ["OPENAI_API_ORG"],
-            "help": "https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key"
+            "help": "https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key",
         }
 
     @classmethod
     def meets_requirements(cls):
-        api_key = os.getenv("OPENAI_API_KEY")
-        return api_key is not None
-
-    def __init__(self, openai_key, openai_org=None):
-        self.openai_key = openai_key
-        self.openai_org = openai_org
+        """
+        Check if the necessary API key environment variable is set.
+        """
+        return os.getenv("OPENAI_API_KEY") is not None
 
     def client(self):
-        headers = {
-            "Authorization": f"Bearer {self.openai_key}",
-            "Content-Type": "application/json"
-        }
-        if self.openai_org:
-            headers["OpenAI-Organization"] = self.openai_org
-        return requests.Session(), headers
+        """
+        Lazily creates and returns an OpenAI client instance.
+        """
+        if self._client is None:
+            self._client = OpenAI()
+        return self._client
 
     def model_id(self):
-        session, headers = self.client()
-        response = session.get("https://api.openai.com/v1/models", headers=headers)
-        models = [model["id"] for model in response.json()["data"]]
-        preferred = [self.model_preference, "gpt-4o-mini"]
-        
-        for model in preferred:
-            if model and model in models:
-                return model
-        return preferred[-1]
+        """
+        Fetches the list of models and returns the preferred model ID if available.
+        """
+        try:
+            response = self.client().models.list()
+            models = [model.id for model in response.data]
+            return next(
+                (
+                    model
+                    for model in [self.model_preference, "gpt-4o-mini"]
+                    if model in models
+                ),
+                models[0],
+            )
+        except OpenAIError as e:
+            raise RuntimeError(f"Error fetching models: {e}")
 
     def chat(self, messages):
-        session, headers = self.client()
-
-        chat_completion = CreateChatCompletion(self.model_id(), messages)
-        
-        response = session.post("https://api.openai.com/v1/chat/completions", json=chat_completion.__dict__, headers=headers)
-        if not response.ok:
-            raise Exception(f"Unexpected response {response.status_code}\n{response.text}")
-        chat = ChatCompletion.from_json(response.text)
-        
-        return chat.choices[0].message
+        """
+        Sends messages to the OpenAI API and returns the model's chat response.
+        """
+        try:
+            response = self.client().chat.completions.create(
+                model=self.model_id(), messages=messages
+            )
+            return response.choices[0].message
+        except OpenAIError as e:
+            raise RuntimeError(f"API request failed: {e}")

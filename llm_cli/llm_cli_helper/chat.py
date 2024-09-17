@@ -59,23 +59,30 @@ class Chat(ABC):
         pass
 
     @classmethod
-    def service(cls):
+    def service(cls, service_name="gpt"):
         from .chat_helper.gpt import GPT
+        from .chat_helper.claude import Claude
+        
+        subclasses = cls.__subclasses__()
         selected = None
-        for subclass in cls.__subclasses__():
-            if subclass.meets_requirements():
-                selected = subclass
-                break
-
+        if service_name:
+            for subclass in subclasses:
+                if subclass.requirements()["name"].lower() == service_name.lower():
+                    if subclass.meets_requirements():
+                        selected = subclass
+                        break
+            if not selected:
+                raise cls.Error(f"Requested service '{service_name}' is not available or does not meet requirements.")
+        else:
+            for subclass in subclasses:
+                if subclass.meets_requirements():
+                    selected = subclass
+                    break
+        # Instantiate the selected subclass, specifically handling GPT's required arguments
         if not selected:
             raise cls.Error("No LLM service is configured")
 
-        # Instantiate the selected subclass, specifically handling GPT's required arguments
-        if selected == GPT:
-            openai_key = os.getenv("OPENAI_API_KEY")
-            openai_org = os.getenv("OPENAI_API_ORG")
-            return selected(openai_key, openai_org)
-
+        # Instantiate the selected subclass with required parameters
         return selected()
 
     @classmethod

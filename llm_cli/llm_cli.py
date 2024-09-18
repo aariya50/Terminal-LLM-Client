@@ -8,9 +8,8 @@ from termcolor import colored
 from halo import Halo
 from llm_cli.llm_cli_helper.shell import Shell
 from llm_cli.llm_cli_helper.chat import Chat, Role, Message
-from llm_cli.llm_cli_helper.chat_helper.gpt import GPT
 from llm_cli.llm_cli_helper.prompt import Prompt
-from llm_cli.llm_cli_helper.prompt_helper.response import PromptResponse, Command, Thoughts
+from llm_cli.llm_cli_helper.prompt_helper.response import PromptResponse
 
 def handle_cd_command(command_parts):
     """Handles the 'cd' part of the command and changes the directory."""
@@ -114,14 +113,15 @@ def main():
         question = " ".join(args.command).strip()
         if question:
             try:
-                messages = [Message(Role.User, question, None)]
-                message_dicts = [msg.to_dict() for msg in messages]
+                messages = [Message(Role.User, question)]
+                
                 while True:
                     try:
-                        spin.start()  # Start spinner if implemented
+                        message_dicts = [msg.to_dict() for msg in messages]
+                        spin.start()
                         response = chat.chat(message_dicts)
-                        messages.append(response)
-                        spin.stop()  # Stop spinner if implemented
+                        messages.append(Message.from_dict(response))
+                        spin.stop()
 
                         print(colored(f"\n{response.content}\n", "green"))
 
@@ -135,8 +135,7 @@ def main():
                         if not question:
                             sys.exit(0)
 
-                        messages.append(Message(Role.User, question, None))
-                        message_dicts = [msg.to_dict() for msg in messages]
+                        messages.append(Message(Role.User, question))
 
                     except KeyboardInterrupt:
                         print("\nProcess interrupted. Exiting gracefully.")

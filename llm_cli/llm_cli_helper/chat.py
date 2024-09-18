@@ -1,6 +1,3 @@
-import json
-import os
-# from llm_cli_helper.chat_helper.gpt import GPT
 from abc import ABC, abstractmethod
 
 class Role:
@@ -9,45 +6,35 @@ class Role:
     Assistant = "assistant"
 
 class Message:
-    def __init__(self, role, content, refusal):
+    def __init__(self, role, content):
         self.role = role
         self.content = content
-        self.refusal = refusal
         
     def to_dict(self):
         """Convert the Message instance to a dictionary."""
         return {
             "role": self.role,
-            "content": self.content,
-            "refusal": self.refusal
+            "content": self.content
         }
-    def from_dict(data):
-        """Create a Message instance from a dictionary."""
-        return Message(**data)
-        
-    def to_json(self):
-        return json.dumps(self.__dict__)
 
-    @staticmethod
-    def from_json(data):
-        return Message(**json.loads(data))
+    @classmethod
+    def from_dict(cls, data):
+        if isinstance(data, dict):
+            return cls(data.get('role'), data.get('content'))
+        elif hasattr(data, 'role') and hasattr(data, 'content'):
+            return cls(data.role, data.content)
+        else:
+            raise ValueError("Invalid input for Message.from_dict()")
 
 class Chat(ABC):
     class Error(Exception):
         pass
 
-    Requirements = dict(
-        name=str,
-        requires=list,
-        optional=list,
-        help=str
-    )
-
     def __init__(self):
-        self.model_preference = ""
+        pass
 
     def send(self, message):
-        message_dict = Message(Role.User, message, None).to_dict()
+        message_dict = Message(Role.User, message).to_dict()
         return self.chat([message_dict]).content
 
     @abstractmethod
@@ -58,10 +45,14 @@ class Chat(ABC):
     def model_id(self):
         pass
 
+    @staticmethod
+    @abstractmethod
+    def requirements():
+        pass
+
     @classmethod
-    def service(cls, service_name="claude"):
-        from .chat_helper.gpt import GPT
-        from .chat_helper.claude import Claude
+    def service(cls, service_name="gpt"):
+        from .chat_helper import gpt, claude
         
         subclasses = cls.__subclasses__()
         selected = None
@@ -78,16 +69,7 @@ class Chat(ABC):
                 if subclass.meets_requirements():
                     selected = subclass
                     break
-        # Instantiate the selected subclass, specifically handling GPT's required arguments
         if not selected:
             raise cls.Error("No LLM service is configured")
 
-        # Instantiate the selected subclass with required parameters
         return selected()
-
-    @classmethod
-    def requirements(cls):
-        requirements = []
-        for subclass in cls.__subclasses__():
-            requirements.append(subclass.requirements())
-        return requirements

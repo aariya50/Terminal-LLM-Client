@@ -1,45 +1,91 @@
 import os
+import platform
+from typing import List, Optional
 
 class Shell:
-    # Read the available shells from the /etc/shells file
-    with open("/etc/shells") as f:
-        AVAILABLE_SHELLS = [line.strip() for line in f if not line.startswith('#')]
+    """
+    A class to handle shell-related operations and information.
 
-    # Define preferred shells, prioritizing the user's current shell environment variable
-    PREFERRED_SHELLS = [os.getenv("SHELL"), "/zsh", "/bash", "/sh"]
+    This class provides methods to determine available shells, select a preferred shell,
+    and identify the operating system.
+    """
+
+    def __init__(self):
+        """
+        Initialize the Shell object with available and preferred shells.
+        """
+        self._available_shells: List[str] = self._get_available_shells()
+        self._preferred_shells: List[str] = self._get_preferred_shells()
+
+    @staticmethod
+    def _get_available_shells() -> List[str]:
+        """
+        Get a list of available shells from /etc/shells.
+
+        Returns:
+            List[str]: A list of available shell paths.
+        """
+        try:
+            with open("/etc/shells") as f:
+                return [line.strip() for line in f if line.strip() and not line.startswith('#')]
+        except FileNotFoundError:
+            return []
+
+    @staticmethod
+    def _get_preferred_shells() -> List[str]:
+        """
+        Get a list of preferred shells, starting with the current shell.
+
+        Returns:
+            List[str]: A list of preferred shell paths.
+        """
+        return [os.environ.get("SHELL"), "/zsh", "/bash", "/sh"]
 
     @property
-    def selected(self):
-        # Select the shell based on the available shells and preferred order
-        shell = self.AVAILABLE_SHELLS[0]
-        found = False
+    def selected(self) -> Optional[str]:
+        """
+        Select the first available preferred shell.
 
-        for preferred in self.PREFERRED_SHELLS:
+        Returns:
+            Optional[str]: The path of the selected shell, or None if no shell is available.
+        """
+        for preferred in self._preferred_shells:
             if not preferred:
                 continue
-            for available in self.AVAILABLE_SHELLS:
+            for available in self._available_shells:
                 if available.endswith(preferred):
-                    found = True
-                    shell = available
-                    break
-            if found:
-                break
+                    return available
+        return self._available_shells[0] if self._available_shells else None
 
-        return shell
+    @staticmethod
+    def operating_system() -> str:
+        """
+        Determine the current operating system.
 
-    def operating_system(self):
-        # Determine the operating system based on platform flags
-        if os.name == 'nt':
-            return "windows"
-        elif os.uname().sysname == 'Darwin':
-            return "macOS"
-        elif os.uname().sysname == 'Linux':
-            return "linux"
-        elif os.uname().sysname == 'FreeBSD' or os.uname().sysname == 'OpenBSD':
-            return "bsd"
+        Returns:
+            str: The name of the operating system ('macOS', 'linux', 'windows', 'bsd', or 'posix').
+        """
+        system = platform.system().lower()
+        if system == 'darwin':
+            return 'macOS'
+        elif system == 'linux':
+            return 'linux'
+        elif system == 'windows':
+            return 'windows'
+        elif system in ('freebsd', 'openbsd'):
+            return 'bsd'
         else:
-            return "posix"
+            return 'posix'
 
-    def get_input(self, prompt):
-        # Get input from the user with a prompt
+    @staticmethod
+    def get_input(prompt: str) -> str:
+        """
+        Get user input with a given prompt.
+
+        Args:
+            prompt (str): The prompt to display to the user.
+
+        Returns:
+            str: The user's input, stripped of leading/trailing whitespace.
+        """
         return input(prompt).strip()

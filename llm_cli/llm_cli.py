@@ -113,8 +113,7 @@ def main():
         question = " ".join(args.command).strip()
         if question:
             try:
-                messages = [Message(Role.User, question)]
-                
+                messages = [Message(Role.USER, question)]
                 while True:
                     try:
                         message_dicts = [msg.to_dict() for msg in messages]
@@ -135,7 +134,7 @@ def main():
                         if not question:
                             sys.exit(0)
 
-                        messages.append(Message(Role.User, question))
+                        messages.append(Message(Role.USER, question))
 
                     except KeyboardInterrupt:
                         print("\nProcess interrupted. Exiting gracefully.")

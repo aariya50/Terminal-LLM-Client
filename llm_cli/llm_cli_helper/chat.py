@@ -59,7 +59,7 @@ class Chat(ABC):
         pass
 
     @classmethod
-    def service(cls, service_name="gpt"):
+    def service(cls, service_name="claude"):
         from .chat_helper.gpt import GPT
         from .chat_helper.claude import Claude
         

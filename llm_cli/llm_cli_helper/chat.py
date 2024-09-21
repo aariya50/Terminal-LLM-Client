@@ -2,11 +2,14 @@ from abc import ABC, abstractmethod
 from enum import Enum, auto
 from typing import Dict, Any, List, Union
 
+
 class Role(Enum):
     """Enum representing the roles in a conversation."""
+
     USER = auto()
     SYSTEM = auto()
     ASSISTANT = auto()
+
 
 class Message:
     """Represents a message in a conversation."""
@@ -21,16 +24,13 @@ class Message:
         """
         self.role = role
         self.content = content
-        
+
     def to_dict(self) -> Dict[str, str]:
         """Convert the Message object to a dictionary."""
-        return {
-            "role": self.role.name.lower(),
-            "content": self.content
-        }
+        return {"role": self.role.name.lower(), "content": self.content}
 
     @classmethod
-    def from_dict(cls, data: Union[Dict[str, str], Any]) -> 'Message':
+    def from_dict(cls, data: Union[Dict[str, str], Any]) -> "Message":
         """
         Create a Message object from a dictionary or object.
 
@@ -44,16 +44,18 @@ class Message:
             ValueError: If the input data is invalid.
         """
         if isinstance(data, dict):
-            return cls(Role[data['role'].upper()], data['content'])
-        elif hasattr(data, 'role') and hasattr(data, 'content'):
+            return cls(Role[data["role"].upper()], data["content"])
+        elif hasattr(data, "role") and hasattr(data, "content"):
             return cls(Role[data.role.upper()], data.content)
         raise ValueError("Invalid input for Message.from_dict()")
+
 
 class Chat(ABC):
     """Abstract base class for chat services."""
 
     class Error(Exception):
         """Custom exception for Chat-related errors."""
+
         pass
 
     def send(self, message: str) -> str:
@@ -105,7 +107,7 @@ class Chat(ABC):
         raise NotImplementedError
 
     @classmethod
-    def service(cls, service_name: str = "gpt") -> 'Chat':
+    def service(cls, service_name: str = "gpt") -> "Chat":
         """
         Factory method to create a Chat instance based on the service name.
 
@@ -119,7 +121,7 @@ class Chat(ABC):
             Chat.Error: If no suitable service is found or configured.
         """
         from .chat_helper import gpt, claude
-        
+
         subclasses = cls.__subclasses__()
         selected = None
         if service_name:
@@ -129,7 +131,9 @@ class Chat(ABC):
                         selected = subclass
                         break
             if not selected:
-                raise cls.Error(f"Requested service '{service_name}' is not available or does not meet requirements.")
+                raise cls.Error(
+                    f"Requested service '{service_name}' is not available or does not meet requirements."
+                )
         else:
             for subclass in subclasses:
                 if subclass.meets_requirements():

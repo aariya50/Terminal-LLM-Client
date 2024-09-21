@@ -1,5 +1,6 @@
 import json
 
+
 class Thoughts:
     def __init__(self, text, reasoning=None, plan=None, criticism=None, speak=None):
         self.text = text
@@ -15,6 +16,7 @@ class Thoughts:
     def from_dict(cls, data):
         return cls(**data)
 
+
 class Command:
     def __init__(self, description, command):
         self.description = description
@@ -26,6 +28,7 @@ class Command:
     @classmethod
     def from_dict(cls, data):
         return cls(**data)
+
 
 class PromptResponse:
     def __init__(self, thoughts, commands):
@@ -61,12 +64,12 @@ class PromptResponse:
     def to_dict(self):
         return {
             "thoughts": self.thoughts.to_dict(),
-            "commands": [cmd.to_dict() for cmd in self.commands]
+            "commands": [cmd.to_dict() for cmd in self.commands],
         }
 
     @classmethod
     def from_json(cls, data):
         obj = json.loads(data)
-        thoughts = Thoughts.from_dict(obj['thoughts'])
-        commands = [Command.from_dict(cmd) for cmd in obj['commands']]
+        thoughts = Thoughts.from_dict(obj["thoughts"])
+        commands = [Command.from_dict(cmd) for cmd in obj["commands"]]
         return cls(thoughts, commands)

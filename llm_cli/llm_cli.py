@@ -10,6 +10,7 @@ from llm_cli.llm_cli_helper.shell import Shell
 from llm_cli.llm_cli_helper.chat import Chat, Role, Message
 from llm_cli.llm_cli_helper.prompt import Prompt
 
+
 def handle_cd_command(command_parts):
     """Handles the 'cd' part of the command and changes the directory."""
     for index, cmd in enumerate(command_parts):
@@ -22,6 +23,7 @@ def handle_cd_command(command_parts):
                 print(colored(f"Failed to change directory to {new_dir}: {e}", "red"))
             return True
     return False
+
 
 def execute_single_command(shell, command):
     """Executes a single shell command directly in the terminal."""
@@ -36,9 +38,10 @@ def execute_single_command(shell, command):
     else:
         print(colored(f"Command failed with exit code: {process.returncode}", "red"))
 
+
 def execute_commands(shell, full_command):
     """Splits and executes both composite and non-composite commands."""
-    command_parts = full_command.split("&&") if '&&' in full_command else [full_command]
+    command_parts = full_command.split("&&") if "&&" in full_command else [full_command]
 
     for command in command_parts:
         command = command.strip()
@@ -48,7 +51,7 @@ def execute_commands(shell, full_command):
             args = shlex.split(command)
             if handle_cd_command(args):
                 continue  # Skip executing 'cd' as a shell command
-        
+
         # For non-cd commands, execute them normally
         execute_single_command(shell, command)
 
@@ -230,7 +233,7 @@ def main():
                     if do_exec.lower() == "exit":
                         print(colored("Exiting process.", "red"))
                         sys.exit(0)
-                    
+
                     # Stop execution if the user doesn't confirm with 'y'
                     if not do_exec.lower().startswith("y"):
                         print(colored("Failed to approve command execution.", "red"))

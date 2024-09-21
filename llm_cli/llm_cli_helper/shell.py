@@ -2,6 +2,7 @@ import os
 import platform
 from typing import List, Optional
 
+
 class Shell:
     """
     A class to handle shell-related operations and information.
@@ -27,7 +28,11 @@ class Shell:
         """
         try:
             with open("/etc/shells") as f:
-                return [line.strip() for line in f if line.strip() and not line.startswith('#')]
+                return [
+                    line.strip()
+                    for line in f
+                    if line.strip() and not line.startswith("#")
+                ]
         except FileNotFoundError:
             return []
 
@@ -66,16 +71,16 @@ class Shell:
             str: The name of the operating system ('macOS', 'linux', 'windows', 'bsd', or 'posix').
         """
         system = platform.system().lower()
-        if system == 'darwin':
-            return 'macOS'
-        elif system == 'linux':
-            return 'linux'
-        elif system == 'windows':
-            return 'windows'
-        elif system in ('freebsd', 'openbsd'):
-            return 'bsd'
+        if system == "darwin":
+            return "macOS"
+        elif system == "linux":
+            return "linux"
+        elif system == "windows":
+            return "windows"
+        elif system in ("freebsd", "openbsd"):
+            return "bsd"
         else:
-            return 'posix'
+            return "posix"
 
     @staticmethod
     def get_input(prompt: str) -> str:

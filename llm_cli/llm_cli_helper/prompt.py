@@ -2,11 +2,14 @@ import re
 import json
 from .prompt_helper.response import PromptResponse
 
+
 class Prompt:
     def __init__(self, constraints=None):
         self.constraints = [str(c) for c in constraints or []]
         self.name = "Command Line Helper"
-        self.description = "an AI designed to autonomously construct and run CLI commands"
+        self.description = (
+            "an AI designed to autonomously construct and run CLI commands"
+        )
         self.goals = []
 
     def add_constraint(self, constraint):
@@ -19,7 +22,9 @@ class Prompt:
         if isinstance(goal, list):
             self.goals.extend(goal)
         else:
-            self.goals.extend([g.strip() for g in re.split(r"then|\\.\\s", goal) if g.strip()])
+            self.goals.extend(
+                [g.strip() for g in re.split(r"then|\\.\\s", goal) if g.strip()]
+            )
 
     def response_format(self):
         return {

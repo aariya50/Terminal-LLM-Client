@@ -1,13 +1,10 @@
 import re
 import json
-
 from .prompt_helper.response import PromptResponse
 
 class Prompt:
     def __init__(self, constraints=None):
-        if constraints is None:
-            constraints = []
-        self.constraints = [str(c) for c in constraints]
+        self.constraints = [str(c) for c in constraints or []]
         self.name = "Command Line Helper"
         self.description = "an AI designed to autonomously construct and run CLI commands"
         self.goals = []
@@ -20,8 +17,7 @@ class Prompt:
 
     def add_goal(self, goal):
         if isinstance(goal, list):
-            for g in goal:
-                self.add_goal(g)
+            self.goals.extend(goal)
         else:
             self.goals.extend([g.strip() for g in re.split(r"then|\\.\\s", goal) if g.strip()])
 
@@ -42,19 +38,16 @@ class Prompt:
             ],
         }
 
-    def generate_list(self, items):
-        return "\n".join([f"{i+1}. {item}" for i, item in enumerate(items)])
-
     def generate(self):
         return f"""You are {self.name}, {self.description}.
         Your decisions must always be made independently without seeking user assistance. Play to your strengths as an LLM and pursue simple strategies with no legal complications.
 
         GOALS:
 
-        {self.generate_list(self.goals)}
+        {self._generate_list(self.goals)}
         CONSTRAINTS:
 
-        {self.generate_list(self.constraints)}
+        {self._generate_list(self.constraints)}
         You should only respond in JSON format as described below
         Response Format:
         {json.dumps(self.response_format(), indent=2)}
@@ -63,3 +56,7 @@ class Prompt:
 
     def parse_response(self, response_json):
         return PromptResponse.from_json(response_json)
+
+    @staticmethod
+    def _generate_list(items):
+        return "\n".join([f"{i+1}. {item}" for i, item in enumerate(items)])

@@ -9,17 +9,11 @@ class Thoughts:
         self.speak = speak
 
     def to_dict(self):
-        return {
-            "text": self.text,
-            "reasoning": self.reasoning,
-            "plan": self.plan,
-            "criticism": self.criticism,
-            "speak": self.speak
-        }
+        return {k: v for k, v in vars(self).items() if v is not None}
 
-    @staticmethod
-    def from_dict(data):
-        return Thoughts(**data)
+    @classmethod
+    def from_dict(cls, data):
+        return cls(**data)
 
 class Command:
     def __init__(self, description, command):
@@ -27,14 +21,11 @@ class Command:
         self.command = command
 
     def to_dict(self):
-        return {
-            "description": self.description,
-            "command": self.command
-        }
+        return vars(self)
 
-    @staticmethod
-    def from_dict(data):
-        return Command(**data)
+    @classmethod
+    def from_dict(cls, data):
+        return cls(**data)
 
 class PromptResponse:
     def __init__(self, thoughts, commands):
@@ -42,7 +33,7 @@ class PromptResponse:
         self.commands = commands
 
     def empty(self):
-        return len(self.commands) == 0
+        return not self.commands
 
     @property
     def text(self):
@@ -61,14 +52,11 @@ class PromptResponse:
         return self.thoughts.speak
 
     def plan(self):
-        plan = self.thoughts.plan
-        if isinstance(plan, str):
-            points = [plan]
-        elif isinstance(plan, list):
-            points = plan
-        else:
-            points = []
-        return "\n".join(points)
+        if isinstance(self.thoughts.plan, str):
+            return self.thoughts.plan
+        elif isinstance(self.thoughts.plan, list):
+            return "\n".join(self.thoughts.plan)
+        return ""
 
     def to_dict(self):
         return {
@@ -76,9 +64,9 @@ class PromptResponse:
             "commands": [cmd.to_dict() for cmd in self.commands]
         }
 
-    @staticmethod
-    def from_json(data):
+    @classmethod
+    def from_json(cls, data):
         obj = json.loads(data)
         thoughts = Thoughts.from_dict(obj['thoughts'])
         commands = [Command.from_dict(cmd) for cmd in obj['commands']]
-        return PromptResponse(thoughts, commands)
+        return cls(thoughts, commands)

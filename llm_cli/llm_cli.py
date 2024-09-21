@@ -9,7 +9,6 @@ from halo import Halo
 from llm_cli.llm_cli_helper.shell import Shell
 from llm_cli.llm_cli_helper.chat import Chat, Role, Message
 from llm_cli.llm_cli_helper.prompt import Prompt
-from llm_cli.llm_cli_helper.prompt_helper.response import PromptResponse
 
 def handle_cd_command(command_parts):
     """Handles the 'cd' part of the command and changes the directory."""
@@ -176,7 +175,7 @@ def main():
             print(colored(f"> Raw response:\n{response}\n", "red"))
 
         try:
-            cmds = PromptResponse.from_json(response)
+            cmds = prompt.parse_response(response)
             if not cmds:
                 print(colored("Failed to generate commands:", "red"))
                 print(colored(cmds.speak or cmds.criticism or cmds.text, "red"))

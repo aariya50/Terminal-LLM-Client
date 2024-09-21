@@ -1,4 +1,3 @@
-
 # LLM-CLI
 
 [![Poetry](https://img.shields.io/badge/poetry-managed-blue)](https://python-poetry.org/)
@@ -18,8 +17,6 @@
 - [Development](#development)
 - [License](#license)
 
----
-
 ## Features
 
 - Query large language models (LLMs) directly from the command line.
@@ -33,9 +30,18 @@
 
 Since this project is not deployed on PyPI, you can install it locally using `pipx` or `pip` with the built `.whl` file.
 
-### 1. Build the Project
+### 1. Clone the Repository
 
-First, build the `.whl` file using Poetry:
+First, clone the repository and navigate to the project directory:
+
+```bash
+git clone https://github.com/your-repo/llm-cli.git
+cd llm-cli
+```
+
+### 2. Build the Project
+
+Build the `.whl` file using Poetry:
 
 ```bash
 poetry build
@@ -43,7 +49,7 @@ poetry build
 
 This will generate a `.whl` file inside the `dist/` directory.
 
-### 2. Install Using `pipx` (Recommended)
+### 3. Install Using `pipx` (Recommended)
 
 To install the package with `pipx`, use the following command:
 
@@ -53,7 +59,7 @@ pipx install dist/llm_cli-0.1.0-py3-none-any.whl
 
 This installs the CLI tool in an isolated environment, making it easy to manage.
 
-### 3. Install Using `pip`
+### 4. Install Using `pip`
 
 Alternatively, you can install the tool using `pip`:
 
@@ -87,51 +93,7 @@ If you request the following task:
 llm "create a dir called test and create a shell script that prints hello world and run it"
 ```
 
-The tool will break the request into commands like this:
-
-```
-Creating a directory, writing a script within it, making the script executable, and then running the script.
-  - NOTE: This plan assumes that the user possesses sufficient permissions to perform these tasks and that the current working directory is suitable for the directory 'test' to be made.
-Commands:
- > mkdir test
- > cd test
- > echo 'echo Hello World' > hello_world.sh
- > chmod +x hello_world.sh
- > ./hello_world.sh
-
-Create a directory named 'test'
-preparing: mkdir test
-mkdir test
-execute [Y]? y
-Command 'mkdir test' executed successfully!
-
-Navigate to the 'test' directory
-preparing: cd test
-cd test
-execute [Y]? y
-Changed directory to: /Users/atest50/test
-
-Create a shell script that prints 'Hello World' in the 'test' directory
-preparing: echo 'echo Hello World' > hello_world.sh
-echo 'echo Hello World' > hello_world.sh
-execute [Y]? y
-Command 'echo 'echo Hello World' > hello_world.sh' executed successfully!
-
-Change the permissions of the shell script to make it executable
-preparing: chmod +x hello_world.sh
-chmod +x hello_world.sh
-execute [Y]? y
-Command 'chmod +x hello_world.sh' executed successfully!
-
-Run the 'Hello World' script
-preparing: ./hello_world.sh
-./hello_world.sh
-execute [Y]? y
-Hello World
-Command './hello_world.sh' executed successfully!
-```
-
-This approach allows users to verify and confirm commands before they are executed.
+The tool will break the request into commands and execute them step by step, asking for confirmation before each action.
 
 ### Options
 
@@ -156,17 +118,14 @@ LLM-CLI will check if the API key is set before sending any queries.
 
 ### Model Selection
 
-If you do not specify a model with the `--model` option, LLM-CLI will automatically default to model (`"gpt-4o-mini"`). The CLI will check the following models in order of preference:
+If you do not specify a model with the `--model` option, LLM-CLI will automatically default to the model `"gpt-4o-mini"`. The CLI will check the following models in order of preference:
 
 1. The model provided via the `--model` option.
-2. Preferred models:
-   - `"gpt-4o-mini"`
+2. Default model: `"gpt-4o-mini"`
 
 ## Development
 
-If you wish to run the tool, follow these steps to set up a local development environment:
-
-### Set up Poetry Environment
+To set up a local development environment:
 
 ```bash
 git clone https://github.com/your-repo/llm-cli.git
@@ -174,14 +133,16 @@ cd llm-cli
 poetry install
 ```
 
-### Running Locally
-
 To run the CLI in development mode:
 
 ```bash
 poetry run llm -q "Test query"
 ```
 
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
 ## License
 
-This project is unliscensed so far.
+This project is currently unlicensed. Please check back for updates on licensing information.

@@ -5,6 +5,13 @@ from ..chat import Chat
 
 
 class GPT(Chat):
+    """
+    A class to interact with the GPT AI model using the OpenAI API.
+
+    This class provides methods to initialize the GPT client, check requirements,
+    and send chat messages to the GPT model.
+    """
+
     # Default model for GPT API
     DEFAULT_MODEL = "gpt-4o-mini"
 
@@ -12,17 +19,19 @@ class GPT(Chat):
         """
         Initialize the GPT chat instance.
 
-        :param model_preference: Preferred model ID, defaults to DEFAULT_MODEL
+        Args:
+            model_preference (str): Preferred model ID. Defaults to DEFAULT_MODEL.
         """
         self._client: Optional[OpenAI] = None
-        self.model_preference = model_preference
+        self.model_preference: str = model_preference
 
     @classmethod
     def requirements(cls) -> Dict[str, str]:
         """
         Specify the requirements for using GPT.
 
-        :return: Dictionary containing name, required environment variables, and help link
+        Returns:
+            Dict[str, str]: Dictionary containing name, required environment variables, and help link.
         """
         return {
             "name": "gpt",
@@ -35,7 +44,8 @@ class GPT(Chat):
         """
         Check if the required API key is set in the environment.
 
-        :return: True if the API key is set, False otherwise
+        Returns:
+            bool: True if the API key is set, False otherwise.
         """
         return os.getenv("OPENAI_API_KEY") is not None
 
@@ -43,7 +53,8 @@ class GPT(Chat):
         """
         Get or create an OpenAI client instance.
 
-        :return: OpenAI client instance
+        Returns:
+            OpenAI: OpenAI client instance.
         """
         if self._client is None:
             self._client = OpenAI()
@@ -54,8 +65,11 @@ class GPT(Chat):
         Get the model ID to use for chat completions.
         Attempts to use the preferred model, falls back to DEFAULT_MODEL or the first available model.
 
-        :return: Model ID string
-        :raises RuntimeError: If there's an error fetching the models
+        Returns:
+            str: Model ID string.
+
+        Raises:
+            RuntimeError: If there's an error fetching the models.
         """
         try:
             response = self.client().models.list()
@@ -75,9 +89,14 @@ class GPT(Chat):
         """
         Send a chat request to the GPT API and return the response.
 
-        :param messages: List of message dictionaries
-        :return: Response message from GPT
-        :raises RuntimeError: If the API request fails
+        Args:
+            messages (List[Dict[str, str]]): List of message dictionaries.
+
+        Returns:
+            Dict[str, str]: Response message from GPT.
+
+        Raises:
+            RuntimeError: If the API request fails.
         """
         try:
             response = self.client().chat.completions.create(

@@ -5,6 +5,13 @@ from ..chat import Chat
 
 
 class Claude(Chat):
+    """
+    A class to interact with the Claude AI model using the Anthropic API.
+
+    This class provides methods to initialize the Claude client, check requirements,
+    and send chat messages to the Claude model.
+    """
+
     # Default model for Claude API
     DEFAULT_MODEL = "claude-3-haiku-20240307"
 
@@ -12,17 +19,19 @@ class Claude(Chat):
         """
         Initialize the Claude chat instance.
 
-        :param model_preference: Preferred model ID, defaults to DEFAULT_MODEL
+        Args:
+            model_preference (str): Preferred model ID. Defaults to DEFAULT_MODEL.
         """
         self._client: Optional[Anthropic] = None
-        self.model_preference = model_preference
+        self.model_preference: str = model_preference
 
     @classmethod
     def requirements(cls) -> Dict[str, str]:
         """
         Specify the requirements for using Claude.
 
-        :return: Dictionary containing name, required environment variables, and help link
+        Returns:
+            Dict[str, str]: Dictionary containing name, required environment variables, and help link.
         """
         return {
             "name": "claude",
@@ -35,7 +44,8 @@ class Claude(Chat):
         """
         Check if the required API key is set in the environment.
 
-        :return: True if the API key is set, False otherwise
+        Returns:
+            bool: True if the API key is set, False otherwise.
         """
         return os.getenv("ANTHROPIC_API_KEY") is not None
 
@@ -43,7 +53,8 @@ class Claude(Chat):
         """
         Get or create an Anthropic client instance.
 
-        :return: Anthropic client instance
+        Returns:
+            Anthropic: Anthropic client instance.
         """
         if self._client is None:
             self._client = Anthropic()
@@ -53,17 +64,23 @@ class Claude(Chat):
         """
         Get the model ID to use for chat completions.
 
-        :return: Model ID string
+        Returns:
+            str: Model ID string.
         """
-        return self.DEFAULT_MODEL
+        return self.model_preference
 
     def chat(self, messages: List[Dict[str, str]]) -> str:
         """
         Send a chat request to the Claude API and return the response.
 
-        :param messages: List of message dictionaries
-        :return: Response text from Claude
-        :raises ValueError: If no response content is received
+        Args:
+            messages (List[Dict[str, str]]): List of message dictionaries.
+
+        Returns:
+            str: Response text from Claude.
+
+        Raises:
+            ValueError: If no response content is received.
         """
         client = self.client()
         response = client.messages.create(

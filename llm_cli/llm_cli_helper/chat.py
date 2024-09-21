@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum, auto
-from typing import Dict, Any, List, Union
+from typing import Dict, Any, List, Union, Type, Optional
 
 
 class Role(Enum):
@@ -22,11 +22,16 @@ class Message:
             role (Role): The role of the message sender.
             content (str): The content of the message.
         """
-        self.role = role
-        self.content = content
+        self.role: Role = role
+        self.content: str = content
 
     def to_dict(self) -> Dict[str, str]:
-        """Convert the Message object to a dictionary."""
+        """
+        Convert the Message object to a dictionary.
+
+        Returns:
+            Dict[str, str]: A dictionary representation of the Message.
+        """
         return {"role": self.role.name.lower(), "content": self.content}
 
     @classmethod
@@ -92,18 +97,36 @@ class Chat(ABC):
 
     @abstractmethod
     def model_id(self) -> str:
-        """Return the identifier of the model being used."""
+        """
+        Return the identifier of the model being used.
+
+        Returns:
+            str: The model identifier.
+        """
         pass
 
     @staticmethod
     @abstractmethod
     def requirements() -> Dict[str, Any]:
-        """Return the requirements for the chat service."""
+        """
+        Return the requirements for the chat service.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing the service requirements.
+        """
         pass
 
     @classmethod
     def meets_requirements(cls) -> bool:
-        """Check if the current environment meets the service requirements."""
+        """
+        Check if the current environment meets the service requirements.
+
+        Returns:
+            bool: True if requirements are met, False otherwise.
+
+        Raises:
+            NotImplementedError: If not implemented in the subclass.
+        """
         raise NotImplementedError
 
     @classmethod
@@ -122,8 +145,8 @@ class Chat(ABC):
         """
         from .chat_helper import gpt, claude
 
-        subclasses = cls.__subclasses__()
-        selected = None
+        subclasses: List[Type[Chat]] = cls.__subclasses__()
+        selected: Optional[Type[Chat]] = None
         if service_name:
             for subclass in subclasses:
                 if subclass.requirements()["name"].lower() == service_name.lower():

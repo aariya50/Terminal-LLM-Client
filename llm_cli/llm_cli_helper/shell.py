@@ -25,6 +25,9 @@ class Shell:
 
         Returns:
             List[str]: A list of available shell paths.
+
+        Note:
+            Returns an empty list if /etc/shells is not found.
         """
         try:
             with open("/etc/shells") as f:

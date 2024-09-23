@@ -64,16 +64,16 @@ class Prompt:
         """
         return {
             "thoughts": {
-                "text": str,
-                "reasoning": str,
-                "plan": List[str],
-                "criticism": str,
-                "speak": str,
+                "text": "Example thought text",
+                "reasoning": "Example reasoning",
+                "plan": ["Step 1", "Step 2", "Step 3"],
+                "criticism": "Example criticism",
+                "speak": "Example speak text",
             },
             "commands": [
                 {
-                    "description": str,
-                    "command": str,
+                    "description": "Example command description",
+                    "command": "example_command",
                 },
             ],
         }
@@ -114,8 +114,7 @@ class Prompt:
             ValueError: If the response cannot be parsed as valid JSON.
         """
         try:
-            parsed_json = json.loads(response_json)
-            return PromptResponse.from_json(parsed_json)
+            return PromptResponse.from_json(response_json)
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON response: {e}")
 

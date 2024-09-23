@@ -18,12 +18,13 @@ from llm_cli.llm_cli_helper.chat import Chat, Role, Message
 from llm_cli.llm_cli_helper.prompt import Prompt
 
 
-def handle_cd_command(command_parts):
+def handle_cd_command(command_parts, chat):
     """
     Handle the 'cd' command and change the current working directory.
 
     Args:
         command_parts (list): List of command parts.
+        chat (Chat): Chat object for LLM interaction.
 
     Returns:
         bool: True if 'cd' command was handled, False otherwise.
@@ -34,36 +35,91 @@ def handle_cd_command(command_parts):
             try:
                 os.chdir(new_dir)
                 print(colored(f"Changed directory to: {os.getcwd()}", "green"))
+            except FileNotFoundError:
+                print(colored(f"Directory '{new_dir}' not found.", "red"))
+                analyze_error(f"cd {new_dir}", f"Directory '{new_dir}' not found.", chat)
+            except PermissionError:
+                print(colored(f"Permission denied to access directory '{new_dir}'.", "red"))
+                analyze_error(f"cd {new_dir}", f"Permission denied to access directory '{new_dir}'.", chat)
             except Exception as e:
                 print(colored(f"Failed to change directory to {new_dir}: {e}", "red"))
+                analyze_error(f"cd {new_dir}", str(e), chat)
             return True
     return False
 
 
-def execute_single_command(shell, command):
+def analyze_error(command, error_output, chat):
+    """
+    Ask the user if they want to analyze the error, and if so, send the failed command
+    and its error output to the LLM for analysis.
+
+    Args:
+        command (str): The command that failed.
+        error_output (str): The error output from the command.
+        chat (Chat): Chat object for LLM interaction.
+    """
+    analyze = input(colored("\nWould you like to analyze this error? (y/n): ", "yellow")).strip().lower()
+    if analyze != 'y':
+        print(colored("Exiting error analysis.", "yellow"))
+        return
+
+    prompt = f"""
+    The following command failed:
+    {command}
+
+    Error output:
+    {error_output}
+
+    Please provide a brief explanation of why this command failed and suggest a concise solution.
+    Limit your response to 2-3 sentences.
+    """
+
+    print(colored("\nAnalyzing error with LLM...", "magenta"))
+    spin = Halo(text="Processing", spinner="dots")
+    spin.start()
+
+    try:
+        response = chat.send(prompt)
+        spin.stop()
+        print(colored("\nLLM Analysis:", "magenta"))
+        print(colored(response, "cyan"))
+        sys.exit(1)
+    except Exception as e:
+        spin.stop()
+        print(colored(f"Failed to get LLM analysis: {e}", "red"))
+
+def execute_single_command(shell, command, chat):
     """
     Execute a single shell command directly in the terminal.
 
     Args:
         shell (Shell): Shell object containing the selected shell.
         command (str): Command to execute.
+        chat (Chat): Chat object for LLM interaction.
     """
-    process = Popen([shell.selected, "-c", command], stdin=PIPE, stderr=STDOUT)
-    process.wait()
+    try:
+        process = Popen([shell.selected, "-c", command], stdin=PIPE, stdout=PIPE, stderr=STDOUT, text=True)
+        output, _ = process.communicate()
 
-    if process.returncode == 0:
-        print(colored(f"Command '{command}' executed successfully!", "green"))
-    else:
-        print(colored(f"Command failed with exit code: {process.returncode}", "red"))
+        if process and process.returncode == 0:
+            print(colored(f"Command '{command}' executed successfully!", "green"))
+            print(colored(output, "cyan"))
+        else:
+            print(colored(f"Command failed with exit code: {process.returncode}", "red"))
+            print(colored(output, "yellow"))
+            analyze_error(command, output, chat)
+    except Exception as e:
+        print(colored(f"An error occurred while executing the command: {e}", "red"))
+        analyze_error(command, str(e), chat)
 
-
-def execute_commands(shell, full_command):
+def execute_commands(shell, full_command, chat):
     """
     Split and execute both composite and non-composite commands.
 
     Args:
         shell (Shell): Shell object containing the selected shell.
         full_command (str): Full command string to execute.
+        chat (Chat): Chat object for LLM interaction.
     """
     command_parts = full_command.split("&&") if "&&" in full_command else [full_command]
 
@@ -72,10 +128,10 @@ def execute_commands(shell, full_command):
 
         if command.startswith("cd "):
             args = shlex.split(command)
-            if handle_cd_command(args):
+            if handle_cd_command(args, chat):
                 continue
 
-        execute_single_command(shell, command)
+        execute_single_command(shell, command, chat)
 
 
 def main():
@@ -205,7 +261,7 @@ def _handle_command_mode(args, chat, shell, spin, verbose):
             print(colored(cmds.speak or cmds.criticism or cmds.text, "red"))
             sys.exit(0)
 
-        _process_commands(cmds, shell)
+        _process_commands(cmds, chat, shell)
 
     except Exception as error:
         spin.stop()
@@ -213,7 +269,7 @@ def _handle_command_mode(args, chat, shell, spin, verbose):
         sys.exit(2)
 
 
-def _process_commands(cmds, shell):
+def _process_commands(cmds, chat, shell):
     """Process and execute the generated commands."""
     print(colored(cmds.speak or cmds.text, "dark_grey"))
     if cmds.criticism:
@@ -228,13 +284,13 @@ def _process_commands(cmds, shell):
 
     try:
         for cmd in cmds.commands:
-            _execute_command(cmd, shell, pattern, previous)
+            _execute_command(cmd, shell, pattern, previous, chat)
     except KeyboardInterrupt:
         print("\nProcess interrupted. Exiting gracefully.")
         sys.exit(0)
 
 
-def _execute_command(cmd, shell, pattern, previous):
+def _execute_command(cmd, shell, pattern, previous, chat):
     """Execute a single command with user input handling."""
     print(colored(f"\n{cmd.description}", "green"))
     print(colored(f"preparing: {cmd.command}", "dark_grey"))
@@ -271,7 +327,7 @@ def _execute_command(cmd, shell, pattern, previous):
         print(colored("Failed to approve command execution.", "red"))
         sys.exit(0)
 
-    execute_commands(shell, execute)
+    execute_commands(shell, execute, chat)
 
 
 if __name__ == "__main__":

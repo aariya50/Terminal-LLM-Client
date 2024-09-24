@@ -136,7 +136,7 @@ poetry install
 To run the CLI in development mode:
 
 ```bash
-poetry run llm -q "Test query"
+poetry run llm -q Test query
 ```
 
 ## Contributing

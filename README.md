@@ -76,7 +76,7 @@ This installs the package for the current user without needing administrator per
 To query the LLM, simply run:
 
 ```bash
-llm -q "Your question here"
+llm -q Your question here
 ```
 
 This will send the query to the LLM and return a response as well as entering an interactive mode where the tool waits for further input. In interactive mode, after each response, you can continue the conversation or type `exit` to end the session.
@@ -90,7 +90,7 @@ LLM-CLI can execute complex shell commands based on natural language requests. T
 If you request the following task:
 
 ```bash
-llm "create a dir called test and create a shell script that prints hello world and run it"
+llm create a dir called test and create a shell script that prints hello world and run it
 ```
 
 The tool will break the request into commands and execute them step by step, asking for confirmation before each action.
